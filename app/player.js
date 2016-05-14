@@ -1,13 +1,14 @@
 System.register([], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
-    var TURN_TIME, TRASH_PENALTY_TIME, ALPHABET, Player;
+    var TURN_TIME, TRASH_PENALTY_TIME, EXCLAIMATION_CHANCE, ALPHABET, Player;
     return {
         setters:[],
         execute: function() {
-            TURN_TIME = 5000; //milliseconds
-            TRASH_PENALTY_TIME = 5000;
-            ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            TURN_TIME = 50; //milliseconds
+            TRASH_PENALTY_TIME = 50;
+            EXCLAIMATION_CHANCE = 0.2;
+            ALPHABET = 'abcdefghijklmnopqrstuvwxyz';
             Player = (function () {
                 function Player() {
                     this.currentLetter = this.randomLetter();
@@ -40,7 +41,10 @@ System.register([], function(exports_1, context_1) {
                 };
                 //Could move to the following logic serverside for a more secure game but this is a hack, so no need to worry about cheaters
                 Player.prototype.randomLetter = function () {
-                    return ALPHABET.charAt(Math.floor(Math.random() * 26));
+                    var rand = Math.random();
+                    if (rand < EXCLAIMATION_CHANCE)
+                        return '!';
+                    return ALPHABET.charAt(Math.floor(rand * 26));
                 };
                 Player.prototype.nextTurn = function () {
                     this.ready = false;

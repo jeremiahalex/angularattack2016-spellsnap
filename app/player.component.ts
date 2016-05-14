@@ -12,12 +12,12 @@ import {Player} from './player';
                         {{timeTillNextTurn()}}
                     </div>
                 </div>
-                <button (click)="trashLetter()" >Trash</button>
+                <button (click)="trashLetter()" [disabled]="!player.ready" >skip</button>
                 <div class="next-letter">{{player.nextLetter}}</div>
             </div>
             <div class="player-stats">
-                <h1 class="player-score">SCORE: {{player.score}}</h1>
-                <h2 class="player-rank">RANK: {{playerRaking()}}</h2>
+                <h1 class="player-score">{{player.score}}<small> PTS</small></h1>
+                <p class="player-rank">RANK: {{playerRaking()}}</p>
             </div>
         </section>
     `

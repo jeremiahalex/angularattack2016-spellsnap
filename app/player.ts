@@ -1,6 +1,7 @@
-const TURN_TIME             = 5000; //milliseconds
-const TRASH_PENALTY_TIME    = 5000;
-const ALPHABET              = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const TURN_TIME             = 50; //milliseconds
+const TRASH_PENALTY_TIME    = 50;
+const EXCLAIMATION_CHANCE   = 0.2;
+const ALPHABET              = 'abcdefghijklmnopqrstuvwxyz';
 
 export class Player {
     currentLetter   : string;
@@ -46,7 +47,9 @@ export class Player {
     }
       //Could move to the following logic serverside for a more secure game but this is a hack, so no need to worry about cheaters
     randomLetter():string{
-        return ALPHABET.charAt(Math.floor(Math.random() * 26));
+        var rand = Math.random();
+        if ( rand < EXCLAIMATION_CHANCE ) return '!';
+        return ALPHABET.charAt(Math.floor(rand * 26));
     }
    
     nextTurn(){
