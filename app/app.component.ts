@@ -1,7 +1,9 @@
 import {Component} from '@angular/core';
+import {BoardComponent} from './board.component';
 
 @Component({
     selector: 'my-app',
-    template: '<h1>AngularAttack 2016</h1><p>Your project runs!</p>'
+    directives: [BoardComponent],
+    template: '<game-board></game-board>'
 })
 export class AppComponent { }

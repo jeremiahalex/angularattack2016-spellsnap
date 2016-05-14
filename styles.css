@@ -1,0 +1,21 @@
+.board {
+  text-align: center;
+  box-sizing: border-box;
+  font-size: 1.4vmax;
+}
+
+.board-row {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+}
+.board-cell {
+  background-color: antiquewhite;
+  border: 2px solid bisque;
+  width: 10%;
+  /* vertical height trick, proportion of width*/
+  padding-bottom: 5%;
+  padding-top: 5%;
+}
+
+/*TODO. add responsiveness */
