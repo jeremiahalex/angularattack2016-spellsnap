@@ -1,7 +1,15 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: antiquewhite;
+}
 .board {
   text-align: center;
-  box-sizing: border-box;
   font-size: 1.4vmax;
+  font-weight: bold;
+  padding-top: 110px;
 }
 
 .board-row {
@@ -13,9 +21,87 @@
   background-color: antiquewhite;
   border: 2px solid bisque;
   width: 10%;
-  /* vertical height trick, proportion of width*/
+  /* vertical height trick, proportion of width - not perfect but will do for now */
   padding-bottom: 5%;
   padding-top: 5%;
 }
 
+.board-cell.used {
+  background-color: bisque;
+  border: 2px solid darkgoldenrod;
+}
+.board-cell.starter {
+  background-color: beige;
+  border: 1px solid darkgoldenrod;
+}
+
+.player-box {
+  display: flex;
+  justify-content: space-between;
+  background-color: rgba(255, 255, 255, .5);
+  /*border: 2px solid darkgray;*/
+  position: fixed;
+  width: 100%;
+}
+.player-actions {
+  display: flex;
+  align-items: center;
+  /*background-color: gray;*/
+  text-align: center;
+  padding: 10px;
+}
+.player-stats {
+  text-align: right;
+  /*background-color: white;*/
+  padding: 20px;
+}
+
+.current-letter {
+    width: 25vw;
+    height: 25vw;
+    max-width: 100px;
+    max-height: 100px;
+    display: flex;
+    position: relative;
+    justify-content: center;
+    align-items: center;
+    background-color: bisque;
+    border: 2px solid black;
+    font-size: 2vmax;
+    font-weight: bold;
+}
+
+.time-till {
+    background-color: rgba(0, 0, 0, .5);
+    color: white;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.next-letter {
+    width: 20vw;
+    height: 20vw;
+    max-width: 80px;
+    max-height: 80px;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5vmax;
+    font-weight: bold;
+}
+/*
+
+.next-letter
+
+h1.player-score
+
+h2.player-rank*/
 /*TODO. add responsiveness */
