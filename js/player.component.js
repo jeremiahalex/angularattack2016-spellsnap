@@ -31,8 +31,8 @@ System.register(['@angular/core', './player'], function(exports_1, context_1) {
                     return Math.round(this.player.timeTillTurn / 1000);
                 };
                 PlayerComponent.prototype.timeLeft = function () {
-                    if (this.player.timeLeft <= 0)
-                        return "0";
+                    if (this.player.timeLeft <= 60000)
+                        return "1";
                     return new Date(this.player.timeLeft).getMinutes().toString();
                 };
                 PlayerComponent.prototype.btnClass = function () {

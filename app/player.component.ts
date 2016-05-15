@@ -42,7 +42,7 @@ export class PlayerComponent implements OnInit  {
         return Math.round( this.player.timeTillTurn / 1000 );
     }
     timeLeft(){
-        if ( this.player.timeLeft <= 0 ) return "0"
+        if ( this.player.timeLeft <= 60000 ) return "1"
         
         return new Date(this.player.timeLeft).getMinutes().toString();
     }

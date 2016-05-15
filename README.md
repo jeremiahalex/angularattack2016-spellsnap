@@ -8,8 +8,8 @@
 
 ### How To Play
 
-* Place Letters on the Grid to spell out words - you get one at a time 
-* Letters can be placed alone on an * or next to letterz where they could lead to a valid word
+* Place Letters on the Grid to spell out words - you get one letter at a time 
+* Letters can be placed alone on an * or next to letters where they could lead to a valid word
 * Complete words by placing an ! at the end - the longer the word the more points
 * Trash letters you can't use for a small time penalty
 

@@ -74,6 +74,7 @@ app.get('/', (req, res) => {
    res.send(`
     <h1>Spell SNAP! Server</h1>
     <p>${Object.keys(players).length} Players.</p>
+    <p>Game Ends in.. ${new Date(timeLeft).getMinutes().toString()} mins.</p>
     <a href="${req.protocol}://${req.hostname}${portString}/reset">RESET</a>
    `); 
 });
