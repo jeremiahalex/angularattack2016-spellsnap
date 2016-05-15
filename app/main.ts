@@ -1,8 +1,8 @@
-import {bootstrap}    from '@angular/platform-browser-dynamic';
-import {AppComponent} from './app.component';
-import {enableProdMode} from '@angular/core';
+enableProdMode();
 
-//TODO. enable production mode
-//enableProdMode();
+import {bootstrap}          from '@angular/platform-browser-dynamic';
+import {AppComponent}       from './app.component';
+import {MultiplayerService} from './multiplayer.service';
+import {enableProdMode}     from '@angular/core';
 
-bootstrap(AppComponent);
+bootstrap(AppComponent, [MultiplayerService]);

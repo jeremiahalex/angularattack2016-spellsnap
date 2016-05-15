@@ -1,4 +1,4 @@
-System.register(['@angular/core', './player.component', './player', './word', './words'], function(exports_1, context_1) {
+System.register(['@angular/core', './player.component', './multiplayer.service', './player', './word', './words'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -10,7 +10,7 @@ System.register(['@angular/core', './player.component', './player', './word', '.
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, player_component_1, player_1, word_1, words_1;
+    var core_1, player_component_1, multiplayer_service_1, player_1, word_1, words_1;
     var ROW_COUNT, COLUMN_COUNT, SCORE_PER_LETTER, REMOVE_DELAY_INC, DOUBLE_MATCH_MULTIPLIER, BoardComponent;
     return {
         setters:[
@@ -19,6 +19,9 @@ System.register(['@angular/core', './player.component', './player', './word', '.
             },
             function (player_component_1_1) {
                 player_component_1 = player_component_1_1;
+            },
+            function (multiplayer_service_1_1) {
+                multiplayer_service_1 = multiplayer_service_1_1;
             },
             function (player_1_1) {
                 player_1 = player_1_1;
@@ -36,7 +39,9 @@ System.register(['@angular/core', './player.component', './player', './word', '.
             REMOVE_DELAY_INC = 50; //ms
             DOUBLE_MATCH_MULTIPLIER = 2; //bonus if end two words at once
             BoardComponent = (function () {
-                function BoardComponent() {
+                function BoardComponent(_multiplayerService) {
+                    this._multiplayerService = _multiplayerService;
+                    console.log(_multiplayerService.test());
                     this.loading = true;
                 }
                 BoardComponent.prototype.ngOnInit = function () {
@@ -320,7 +325,7 @@ System.register(['@angular/core', './player.component', './player', './word', '.
                         directives: [player_component_1.PlayerComponent],
                         template: "\n        <player-component [player]=\"player\"></player-component>\n        <section class=\"board\">\n            <div *ngFor=\"let row of gridCells\" class=\"board-row\">\n                <div *ngFor=\"let cell of row\" (click)=\"cellClicked(cell)\" [ngClass]=\"getClass(cell)\">\n                    {{cell.content}}\n                </div>\n            </div>\n        </section>\n    "
                     }), 
-                    __metadata('design:paramtypes', [])
+                    __metadata('design:paramtypes', [multiplayer_service_1.MultiplayerService])
                 ], BoardComponent);
                 return BoardComponent;
             }());

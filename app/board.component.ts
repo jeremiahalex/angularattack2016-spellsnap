@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {PlayerComponent} from './player.component';
+import {MultiplayerService} from './multiplayer.service';
 import {Player} from './player';
 import {Word} from './word';
 import {VALID_WORDS} from './words';
@@ -41,7 +42,8 @@ export class BoardComponent implements OnInit {
     gridCells : GridCell[][];
     loading : boolean; //this should prob be bound to the service
     
-    constructor() {
+    constructor(private _multiplayerService: MultiplayerService) {
+        console.log(_multiplayerService.test());
         this.loading = true;
     }
     
