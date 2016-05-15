@@ -33,7 +33,7 @@ System.register(['@angular/core', './player.component', './multiplayer.service',
                 words_1 = words_1_1;
             }],
         execute: function() {
-            ROW_COUNT = 18; //TODO. these should match the server, best to pull them from their
+            ROW_COUNT = 36; //TODO. these should match the server, best to pull them from their
             COLUMN_COUNT = 18;
             SCORE_PER_LETTER = 2;
             REMOVE_DELAY_INC = 50; //ms
@@ -42,6 +42,7 @@ System.register(['@angular/core', './player.component', './multiplayer.service',
                 function BoardComponent(_multiplayerService) {
                     this._multiplayerService = _multiplayerService;
                     this.loading = true;
+                    this.showInstructions = true;
                 }
                 BoardComponent.prototype.ngOnInit = function () {
                     //make a new player
@@ -371,7 +372,7 @@ System.register(['@angular/core', './player.component', './multiplayer.service',
                     core_1.Component({
                         selector: 'game-board',
                         directives: [player_component_1.PlayerComponent],
-                        template: "\n        <player-component [player]=\"player\"></player-component>\n        <div class=\"other-players-box\">\n            <!-- TODO. could move this into a child component if time permits -->\n            <i class=\"fa fa-users fa-2x\" aria-hidden=\"true\"> </i> \n            <div *ngFor=\"let p of otherPlayers\">\n                <div *ngIf=\"p && p.playerId != _multiplayerService.playerId\" class=\"other-player\" >\n                    {{p.currentLetter || \"?\"}}\n                </div>\n            </div>\n        </div>\n        <section class=\"board\">\n            <div *ngFor=\"let row of gridCells\" class=\"board-row\">\n                <div *ngFor=\"let cell of row\" (click)=\"cellClicked(cell)\" [ngClass]=\"getClass(cell)\">\n                    {{getContent(cell)}}\n                </div>\n            </div>\n        </section>\n    "
+                        template: "\n        <player-component [player]=\"player\"></player-component>\n        <div class=\"other-players-box\">\n            <!-- TODO. could move this into a child component if time permits -->\n            <i class=\"fa fa-users fa-2x\" aria-hidden=\"true\"> </i> \n            <div *ngFor=\"let p of otherPlayers\">\n                <div *ngIf=\"p && p.playerId != _multiplayerService.playerId\" class=\"other-player\" >\n                    {{p.currentLetter || \"?\"}}\n                </div>\n            </div>\n        </div>\n        <div class=\"instructions\" *ngIf=\"showInstructions\" (click)=\"showInstructions = false\" >\n            <div class=\"instructions-box\" >\n                <h1>Spell Snap!</h1>\n                <h2>How to Play</h2>\n                <p>Add Letters to build long words</p>\n                <p>Start new words on an <strong>*</strong></p>\n                <p>Complete words with an <strong>!</strong></p>\n                <p>Compete, Cooperate or Ignore</p>\n            </div>\n        </div>\n        <div *ngIf=\"loading\" class=\"loading-frame\">\n            <i class=\"fa fa-refresh fa-spin fa-3x fa-fw\" aria-hidden=\"true\"></i>\n        </div>\n        <section class=\"board\">\n            <div *ngFor=\"let row of gridCells\" class=\"board-row\">\n                <div *ngFor=\"let cell of row\" (click)=\"cellClicked(cell)\" [ngClass]=\"getClass(cell)\">\n                    {{getContent(cell)}}\n                </div>\n            </div>\n        </section>\n    "
                     }), 
                     __metadata('design:paramtypes', [multiplayer_service_1.MultiplayerService])
                 ], BoardComponent);

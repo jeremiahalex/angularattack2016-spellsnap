@@ -1,6 +1,6 @@
 "use strict";
 
-const ROW_COUNT     = 18;
+const ROW_COUNT     = 36;
 const COLUMN_COUNT  = 18;
 const express       = require("express");
 const http          = require("http");

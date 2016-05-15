@@ -5,7 +5,7 @@ import {Player} from './player';
 import {Word} from './word';
 import {VALID_WORDS} from './words';
 
-const ROW_COUNT = 18;   //TODO. these should match the server, best to pull them from their
+const ROW_COUNT = 36;   //TODO. these should match the server, best to pull them from their
 const COLUMN_COUNT = 18;
 const SCORE_PER_LETTER = 2;
 const REMOVE_DELAY_INC = 50;//ms
@@ -37,6 +37,19 @@ interface GridCell {
                 </div>
             </div>
         </div>
+        <div class="instructions" *ngIf="showInstructions" (click)="showInstructions = false" >
+            <div class="instructions-box" >
+                <h1>Spell Snap!</h1>
+                <h2>How to Play</h2>
+                <p>Add Letters to build long words</p>
+                <p>Start new words on an <strong>*</strong></p>
+                <p>Complete words with an <strong>!</strong></p>
+                <p>Compete, Cooperate or Ignore</p>
+            </div>
+        </div>
+        <div *ngIf="loading" class="loading-frame">
+            <i class="fa fa-refresh fa-spin fa-3x fa-fw" aria-hidden="true"></i>
+        </div>
         <section class="board">
             <div *ngFor="let row of gridCells" class="board-row">
                 <div *ngFor="let cell of row" (click)="cellClicked(cell)" [ngClass]="getClass(cell)">
@@ -51,9 +64,11 @@ export class BoardComponent implements OnInit {
     gridCells : GridCell[][];
     loading : boolean; //this should prob be bound to the service
     otherPlayers : any[];
+    showInstructions : boolean;
     
     constructor(private _multiplayerService: MultiplayerService) {
         this.loading = true;
+        this.showInstructions = true;
     }
     
     ngOnInit() {
