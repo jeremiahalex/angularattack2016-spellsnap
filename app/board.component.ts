@@ -6,13 +6,18 @@ import {VALID_WORDS} from './words';
 
 const ROW_COUNT = 9;
 const COLUMN_COUNT = 9;
-// const enum DIR { Left, Up, Right, Down }
+const SCORE_PER_LETTER = 2;
+const REMOVE_DELAY_INC = 50;//ms
+const DOUBLE_MATCH_MULTIPLIER = 2; //bonus if end two words at once
+
+const enum CELL_STATE { Empty, Using, Used, Removing, Removed }
 
 interface GridCell {
   y: number;
   x: number;
   starter: boolean;
   content: string;
+  state: CELL_STATE;
   wordAcross: Word;
   wordDown: Word;
 }
@@ -34,8 +39,11 @@ interface GridCell {
 export class BoardComponent implements OnInit { 
     player : Player;
     gridCells : GridCell[][];
+    loading : boolean; //this should prob be bound to the service
     
-    constructor() {}
+    constructor() {
+        this.loading = true;
+    }
     
     ngOnInit() {
         //make a new player
@@ -48,7 +56,7 @@ export class BoardComponent implements OnInit {
         for ( let y = 0; y < ROW_COUNT; ++y){
             this.gridCells[y] = [];
             for ( let x = 0; x < COLUMN_COUNT; ++x){
-                this.gridCells[y][x] = { x: x, y: y, starter: false, content: "", wordAcross: null, wordDown: null };
+                this.gridCells[y][x] = { x: x, y: y, starter: false, content: "", wordAcross: null, wordDown: null, state: CELL_STATE.Empty };
                 //temp - we will read the cell values from the server but for now we're just testing our grid, so manuall add 
                 if ( x % 3 === 1 && y % 3 === 1 ){
                     //a valid starter cell
@@ -70,16 +78,44 @@ export class BoardComponent implements OnInit {
         this.findAllWords();
     }
     
-    //in an ideal world, we would cache this and not run it each time there is a change but the pressure of a hackathon is not ideal
-    findAllWords() {
-        //we need to delete all references to words - a better solution would not have two nested loops back to back
+    removeConnectedLetters(x,y, delay) {
+        //end if exceeds grid return
+        if ( x >= COLUMN_COUNT || y >= ROW_COUNT || x < 0 || y < 0 ) return;
+        
+        //if the cell is empty return
+        if ( !this.gridCells[y][x].content ) return;
+        
+        //else set content to zero and try all four neighbours
+        setTimeout( () => {
+            this.gridCells[y][x].state = CELL_STATE.Removed;
+        }, delay);
+        this.gridCells[y][x].content = ""; 
+        this.gridCells[y][x].state = CELL_STATE.Removing;
+        
+        delay += REMOVE_DELAY_INC;
+        this.removeConnectedLetters(x+1,y, delay);
+        this.removeConnectedLetters(x-1,y, delay);
+        this.removeConnectedLetters(x,y+1, delay);
+        this.removeConnectedLetters(x,y-1, delay);
+    }
+    cleanUp() {
+        console.log("removed");
+        //we need to remove each word from the array but if we encounter an exclaimation we also remove all letters that are connected to it
         for ( let y = 0; y < ROW_COUNT; ++y){
             for ( let x = 0; x < COLUMN_COUNT; ++x){
                 this.gridCells[y][x].wordAcross = null;
                 this.gridCells[y][x].wordDown = null;
+                if ( this.gridCells[y][x].content === "!") {
+                    this.removeConnectedLetters(x,y, 0);
+                }
             }
         }
-           
+    }
+    //in an ideal world, we would cache this and not run it each time there is a change but the pressure of a hackathon is not ideal
+    findAllWords() {
+        //we need to delete all references to words - a better solution would not have two nested loops back to back
+        this.cleanUp();
+        
         let words = [];  
         //find all words that occur in the grid   
         for ( let y = 0; y < ROW_COUNT; ++y){
@@ -103,6 +139,7 @@ export class BoardComponent implements OnInit {
             }
         }
         
+        this.loading = false;
         console.log('words found ', words);
     }
     
@@ -166,6 +203,7 @@ export class BoardComponent implements OnInit {
     }
     
     getClass(cell: GridCell) {
+        if ( cell.state === CELL_STATE.Removing ) return "board-cell used";
         if ( cell.content ) return "board-cell used";
         if ( cell.starter ) return "board-cell starter";
         return "board-cell";
@@ -179,30 +217,51 @@ export class BoardComponent implements OnInit {
         return true;
     }
     
+    addLetter(cell: GridCell, letter : string) {
+        console.log('adding new letter');
+        this.loading = true;
+        //TODO. send message to server, disable input until result
+        cell.content = this.player.currentLetter;
+        cell.state = CELL_STATE.Used; //Using
+        
+        this.player.score += SCORE_PER_LETTER;
+        
+        this.player.nextTurn();
+        this.findAllWords();
+    }
     
     claimPoints(cell: GridCell, across:number, down:number) {
         if ( !across && !down ) return;
-        console.log('claiming word/s');
+        console.log('claiming word/s - points ' + across + " & " + down);
+        this.loading = true;
         
         //TODO. send message to server, disable input until result
         cell.content = this.player.currentLetter;
+        cell.state = CELL_STATE.Used; //using
         
         var score = across + down;
-        if ( across && down ) score *- 2;
+        if ( across && down ) {
+            score *= DOUBLE_MATCH_MULTIPLIER;
+            console.log('multiplier applied: ', score); 
+        }
         
         this.player.score += score;
         this.player.nextTurn();
+        this.findAllWords();
     }
     
     cellClicked(cell: GridCell) {
         //All game logic is applied below... it's a bit immense. 
         console.log(`cell clicked at x: ${cell.x}, y: ${cell.x}. Content is: ${cell.content}`);
+        console.log('grid ', this.gridCells );
+        
+        if ( this.loading ) return;
         
         //if player can't play then then move is forbidden
         if ( !this.player.ready ) return;
         console.log('player is ready');
          
-        //if cell is used the move is forbidden
+        //if cell is used then move is forbidden
         if ( cell.content ) return;
         console.log('cell is free');
         
@@ -271,12 +330,7 @@ export class BoardComponent implements OnInit {
         console.log('connecting words downs assessed');
         
         // else add content
-        console.log('adding new word');
-        //TODO. send message to server, disable input until result
-        cell.content = this.player.currentLetter;
-        this.player.nextTurn();
-        
-        this.findAllWords();
+        this.addLetter(cell, this.player.currentLetter);
     }
     
 }

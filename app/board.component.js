@@ -11,7 +11,7 @@ System.register(['@angular/core', './player.component', './player', './word', '.
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
     var core_1, player_component_1, player_1, word_1, words_1;
-    var ROW_COUNT, COLUMN_COUNT, BoardComponent;
+    var ROW_COUNT, COLUMN_COUNT, SCORE_PER_LETTER, REMOVE_DELAY_INC, DOUBLE_MATCH_MULTIPLIER, BoardComponent;
     return {
         setters:[
             function (core_1_1) {
@@ -32,8 +32,12 @@ System.register(['@angular/core', './player.component', './player', './word', '.
         execute: function() {
             ROW_COUNT = 9;
             COLUMN_COUNT = 9;
+            SCORE_PER_LETTER = 2;
+            REMOVE_DELAY_INC = 50; //ms
+            DOUBLE_MATCH_MULTIPLIER = 2; //bonus if end two words at once
             BoardComponent = (function () {
                 function BoardComponent() {
+                    this.loading = true;
                 }
                 BoardComponent.prototype.ngOnInit = function () {
                     //make a new player
@@ -44,7 +48,7 @@ System.register(['@angular/core', './player.component', './player', './word', '.
                     for (var y = 0; y < ROW_COUNT; ++y) {
                         this.gridCells[y] = [];
                         for (var x = 0; x < COLUMN_COUNT; ++x) {
-                            this.gridCells[y][x] = { x: x, y: y, starter: false, content: "", wordAcross: null, wordDown: null };
+                            this.gridCells[y][x] = { x: x, y: y, starter: false, content: "", wordAcross: null, wordDown: null, state: 0 /* Empty */ };
                             //temp - we will read the cell values from the server but for now we're just testing our grid, so manuall add 
                             if (x % 3 === 1 && y % 3 === 1) {
                                 //a valid starter cell
@@ -71,15 +75,43 @@ System.register(['@angular/core', './player.component', './player', './word', '.
                     }
                     this.findAllWords();
                 };
-                //in an ideal world, we would cache this and not run it each time there is a change but the pressure of a hackathon is not ideal
-                BoardComponent.prototype.findAllWords = function () {
-                    //we need to delete all references to words - a better solution would not have two nested loops back to back
+                BoardComponent.prototype.removeConnectedLetters = function (x, y, delay) {
+                    var _this = this;
+                    //end if exceeds grid return
+                    if (x >= COLUMN_COUNT || y >= ROW_COUNT || x < 0 || y < 0)
+                        return;
+                    //if the cell is empty return
+                    if (!this.gridCells[y][x].content)
+                        return;
+                    //else set content to zero and try all four neighbours
+                    setTimeout(function () {
+                        _this.gridCells[y][x].state = 4 /* Removed */;
+                    }, delay);
+                    this.gridCells[y][x].content = "";
+                    this.gridCells[y][x].state = 3 /* Removing */;
+                    delay += REMOVE_DELAY_INC;
+                    this.removeConnectedLetters(x + 1, y, delay);
+                    this.removeConnectedLetters(x - 1, y, delay);
+                    this.removeConnectedLetters(x, y + 1, delay);
+                    this.removeConnectedLetters(x, y - 1, delay);
+                };
+                BoardComponent.prototype.cleanUp = function () {
+                    console.log("removed");
+                    //we need to remove each word from the array but if we encounter an exclaimation we also remove all letters that are connected to it
                     for (var y = 0; y < ROW_COUNT; ++y) {
                         for (var x = 0; x < COLUMN_COUNT; ++x) {
                             this.gridCells[y][x].wordAcross = null;
                             this.gridCells[y][x].wordDown = null;
+                            if (this.gridCells[y][x].content === "!") {
+                                this.removeConnectedLetters(x, y, 0);
+                            }
                         }
                     }
+                };
+                //in an ideal world, we would cache this and not run it each time there is a change but the pressure of a hackathon is not ideal
+                BoardComponent.prototype.findAllWords = function () {
+                    //we need to delete all references to words - a better solution would not have two nested loops back to back
+                    this.cleanUp();
                     var words = [];
                     //find all words that occur in the grid   
                     for (var y = 0; y < ROW_COUNT; ++y) {
@@ -101,6 +133,7 @@ System.register(['@angular/core', './player.component', './player', './word', '.
                             }
                         }
                     }
+                    this.loading = false;
                     console.log('words found ', words);
                 };
                 BoardComponent.prototype.makeWord = function (word, x, y, downwards) {
@@ -161,6 +194,8 @@ System.register(['@angular/core', './player.component', './player', './word', '.
                     return false;
                 };
                 BoardComponent.prototype.getClass = function (cell) {
+                    if (cell.state === 3 /* Removing */)
+                        return "board-cell used";
                     if (cell.content)
                         return "board-cell used";
                     if (cell.starter)
@@ -174,26 +209,44 @@ System.register(['@angular/core', './player.component', './player', './word', '.
                         return false;
                     return true;
                 };
+                BoardComponent.prototype.addLetter = function (cell, letter) {
+                    console.log('adding new letter');
+                    this.loading = true;
+                    //TODO. send message to server, disable input until result
+                    cell.content = this.player.currentLetter;
+                    cell.state = 2 /* Used */; //Using
+                    this.player.score += SCORE_PER_LETTER;
+                    this.player.nextTurn();
+                    this.findAllWords();
+                };
                 BoardComponent.prototype.claimPoints = function (cell, across, down) {
                     if (!across && !down)
                         return;
-                    console.log('claiming word/s');
+                    console.log('claiming word/s - points ' + across + " & " + down);
+                    this.loading = true;
                     //TODO. send message to server, disable input until result
                     cell.content = this.player.currentLetter;
+                    cell.state = 2 /* Used */; //using
                     var score = across + down;
-                    if (across && down)
-                        score * -2;
+                    if (across && down) {
+                        score *= DOUBLE_MATCH_MULTIPLIER;
+                        console.log('multiplier applied: ', score);
+                    }
                     this.player.score += score;
                     this.player.nextTurn();
+                    this.findAllWords();
                 };
                 BoardComponent.prototype.cellClicked = function (cell) {
                     //All game logic is applied below... it's a bit immense. 
                     console.log("cell clicked at x: " + cell.x + ", y: " + cell.x + ". Content is: " + cell.content);
+                    console.log('grid ', this.gridCells);
+                    if (this.loading)
+                        return;
                     //if player can't play then then move is forbidden
                     if (!this.player.ready)
                         return;
                     console.log('player is ready');
-                    //if cell is used the move is forbidden
+                    //if cell is used then move is forbidden
                     if (cell.content)
                         return;
                     console.log('cell is free');
@@ -259,11 +312,7 @@ System.register(['@angular/core', './player.component', './player', './word', '.
                         return;
                     console.log('connecting words downs assessed');
                     // else add content
-                    console.log('adding new word');
-                    //TODO. send message to server, disable input until result
-                    cell.content = this.player.currentLetter;
-                    this.player.nextTurn();
-                    this.findAllWords();
+                    this.addLetter(cell, this.player.currentLetter);
                 };
                 BoardComponent = __decorate([
                     core_1.Component({

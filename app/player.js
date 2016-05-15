@@ -49,7 +49,7 @@ System.register([], function(exports_1, context_1) {
                 Player.prototype.nextTurn = function () {
                     this.ready = false;
                     this.timeTillTurn += TURN_TIME;
-                    this.currentLetter = this.randomLetter(),
+                    this.currentLetter = this.nextLetter,
                         this.nextLetter = this.randomLetter();
                     console.log('next turn in ', this.timeTillTurn);
                 };
