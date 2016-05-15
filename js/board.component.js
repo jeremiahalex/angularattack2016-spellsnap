@@ -33,49 +33,33 @@ System.register(['@angular/core', './player.component', './multiplayer.service',
                 words_1 = words_1_1;
             }],
         execute: function() {
-            ROW_COUNT = 9;
-            COLUMN_COUNT = 9;
+            ROW_COUNT = 18; //TODO. these should match the server, best to pull them from their
+            COLUMN_COUNT = 18;
             SCORE_PER_LETTER = 2;
             REMOVE_DELAY_INC = 50; //ms
             DOUBLE_MATCH_MULTIPLIER = 2; //bonus if end two words at once
             BoardComponent = (function () {
                 function BoardComponent(_multiplayerService) {
                     this._multiplayerService = _multiplayerService;
-                    console.log(_multiplayerService.test());
                     this.loading = true;
                 }
                 BoardComponent.prototype.ngOnInit = function () {
                     //make a new player
                     this.player = new player_1.Player();
-                    //make the grid
+                    this.otherPlayers = [];
+                    //get grid values from the server
+                    this._multiplayerService.registerCallbacks(this.buildGrid.bind(this), this.updateGrid.bind(this), this.letterAccepted.bind(this), this.letterRejected.bind(this), this.playersUpdate.bind(this), this.rankUpdate.bind(this), this.claimAccepted.bind(this), this.claimRejected.bind(this));
+                };
+                BoardComponent.prototype.buildGrid = function (grid) {
+                    //reset the player
+                    this.player.reset();
+                    //clear the grid
                     this.gridCells = [];
-                    //TODO. get grid values from the server
                     for (var y = 0; y < ROW_COUNT; ++y) {
                         this.gridCells[y] = [];
                         for (var x = 0; x < COLUMN_COUNT; ++x) {
-                            this.gridCells[y][x] = { x: x, y: y, starter: false, content: "", wordAcross: null, wordDown: null, state: 0 /* Empty */ };
-                            //temp - we will read the cell values from the server but for now we're just testing our grid, so manuall add 
-                            if (x % 3 === 1 && y % 3 === 1) {
-                                //a valid starter cell
-                                this.gridCells[y][x].starter = true;
-                            }
-                            //some default cells to spell the title
-                            if (x === 1 && y === 1)
-                                this.gridCells[y][x].content = "s";
-                            else if (x === 2 && y === 1)
-                                this.gridCells[y][x].content = "p";
-                            else if (x === 3 && y === 1)
-                                this.gridCells[y][x].content = "e";
-                            else if (x === 4 && y === 1)
-                                this.gridCells[y][x].content = "l";
-                            else if (x === 5 && y === 1)
-                                this.gridCells[y][x].content = "l";
-                            else if (x === 1 && y === 2)
-                                this.gridCells[y][x].content = "n";
-                            else if (x === 1 && y === 3)
-                                this.gridCells[y][x].content = "a";
-                            else if (x === 1 && y === 4)
-                                this.gridCells[y][x].content = "p";
+                            var c = grid[y][x];
+                            this.gridCells[y][x] = { x: c.x, y: c.y, starter: c.starter, content: c.content, wordAcross: null, wordDown: null, state: 0 /* Empty */ };
                         }
                     }
                     this.findAllWords();
@@ -90,10 +74,10 @@ System.register(['@angular/core', './player.component', './multiplayer.service',
                         return;
                     //else set content to zero and try all four neighbours
                     setTimeout(function () {
-                        _this.gridCells[y][x].state = 4 /* Removed */;
+                        _this.gridCells[y][x].state = 5 /* Removed */;
                     }, delay);
                     this.gridCells[y][x].content = "";
-                    this.gridCells[y][x].state = 3 /* Removing */;
+                    this.gridCells[y][x].state = 4 /* Removing */;
                     delay += REMOVE_DELAY_INC;
                     this.removeConnectedLetters(x + 1, y, delay);
                     this.removeConnectedLetters(x - 1, y, delay);
@@ -140,6 +124,7 @@ System.register(['@angular/core', './player.component', './multiplayer.service',
                     }
                     this.loading = false;
                     console.log('words found ', words);
+                    this._multiplayerService.sendStats(this.player.score, this.player.currentLetter);
                 };
                 BoardComponent.prototype.makeWord = function (word, x, y, downwards) {
                     if (downwards === void 0) { downwards = false; }
@@ -198,8 +183,15 @@ System.register(['@angular/core', './player.component', './multiplayer.service',
                     console.log('not valid: ', word);
                     return false;
                 };
+                BoardComponent.prototype.getContent = function (cell) {
+                    if (cell.content)
+                        return cell.content;
+                    if (cell.starter)
+                        return "*";
+                    return "";
+                };
                 BoardComponent.prototype.getClass = function (cell) {
-                    if (cell.state === 3 /* Removing */)
+                    if (cell.state === 4 /* Removing */)
                         return "board-cell used";
                     if (cell.content)
                         return "board-cell used";
@@ -216,30 +208,86 @@ System.register(['@angular/core', './player.component', './multiplayer.service',
                 };
                 BoardComponent.prototype.addLetter = function (cell, letter) {
                     console.log('adding new letter');
+                    //send message to server, disable input until result
                     this.loading = true;
-                    //TODO. send message to server, disable input until result
-                    cell.content = this.player.currentLetter;
-                    cell.state = 2 /* Used */; //Using
+                    cell.state = 1 /* Using */;
+                    this._multiplayerService.addLetter(cell.x, cell.y, this.player.currentLetter);
+                };
+                BoardComponent.prototype.letterAccepted = function (result) {
+                    this.gridCells[result.y][result.x].content = result.letter;
+                    this.gridCells[result.y][result.x].state = 2 /* Used */;
                     this.player.score += SCORE_PER_LETTER;
                     this.player.nextTurn();
+                    this.findAllWords();
+                };
+                BoardComponent.prototype.letterRejected = function (result) {
+                    this.gridCells[result.y][result.x].state = 0 /* Empty */;
+                    this.findAllWords();
+                };
+                BoardComponent.prototype.updateGrid = function (result) {
+                    var _this = this;
+                    this.gridCells[result.y][result.x].content = result.letter;
+                    //To ensure cells are deleted we change them all to exclaimation marks - a bit of a hack but might actually look ok
+                    if (result.cells) {
+                        result.cells.forEach(function (cell) {
+                            _this.gridCells[cell.y][cell.x].content = "!";
+                        });
+                    }
                     this.findAllWords();
                 };
                 BoardComponent.prototype.claimPoints = function (cell, across, down) {
                     if (!across && !down)
                         return;
                     console.log('claiming word/s - points ' + across + " & " + down);
-                    this.loading = true;
-                    //TODO. send message to server, disable input until result
-                    cell.content = this.player.currentLetter;
-                    cell.state = 2 /* Used */; //using
                     var score = across + down;
                     if (across && down) {
                         score *= DOUBLE_MATCH_MULTIPLIER;
                         console.log('multiplier applied: ', score);
                     }
-                    this.player.score += score;
+                    //logic is currently client side so we need to tell the server what cells to remove
+                    var cells = [];
+                    this.findEffectedCells(cells, cell.x, cell.y, true);
+                    console.log('cells: ', cells);
+                    this.loading = true;
+                    cell.state = 1 /* Using */;
+                    this._multiplayerService.claimWord(cell.x, cell.y, cells, score);
+                };
+                BoardComponent.prototype.findEffectedCells = function (cells, x, y, first) {
+                    console.log('checking: %s %s', x, y);
+                    //end if exceeds grid return
+                    if (x >= COLUMN_COUNT || y >= ROW_COUNT || x < 0 || y < 0)
+                        return;
+                    //if the cell is empty return
+                    if (!first && (!this.gridCells[y][x].content || this.gridCells[y][x].state == 3 /* Effecting */))
+                        return;
+                    //mark it as using to
+                    this.gridCells[y][x].state = 3 /* Effecting */;
+                    //else add to the list
+                    cells.push({ x: x, y: y });
+                    this.findEffectedCells(cells, x + 1, y, false);
+                    this.findEffectedCells(cells, x - 1, y, false);
+                    this.findEffectedCells(cells, x, y + 1, false);
+                    this.findEffectedCells(cells, x, y - 1, false);
+                };
+                BoardComponent.prototype.claimAccepted = function (result) {
+                    console.log("claimed ", result);
+                    this.gridCells[result.y][result.x].content = "!";
+                    this.gridCells[result.y][result.x].state = 2 /* Used */;
+                    this.player.score += result.score;
                     this.player.nextTurn();
                     this.findAllWords();
+                };
+                BoardComponent.prototype.claimRejected = function (result) {
+                    this.gridCells[result.y][result.x].state = 0 /* Empty */;
+                    this.findAllWords();
+                };
+                BoardComponent.prototype.playersUpdate = function (result) {
+                    console.log("players updated: ", result);
+                    this.otherPlayers = result;
+                };
+                BoardComponent.prototype.rankUpdate = function (result) {
+                    this.player.rank = result.rank;
+                    console.log("rank updated: ", result);
                 };
                 BoardComponent.prototype.cellClicked = function (cell) {
                     //All game logic is applied below... it's a bit immense. 
@@ -323,7 +371,7 @@ System.register(['@angular/core', './player.component', './multiplayer.service',
                     core_1.Component({
                         selector: 'game-board',
                         directives: [player_component_1.PlayerComponent],
-                        template: "\n        <player-component [player]=\"player\"></player-component>\n        <section class=\"board\">\n            <div *ngFor=\"let row of gridCells\" class=\"board-row\">\n                <div *ngFor=\"let cell of row\" (click)=\"cellClicked(cell)\" [ngClass]=\"getClass(cell)\">\n                    {{cell.content}}\n                </div>\n            </div>\n        </section>\n    "
+                        template: "\n        <player-component [player]=\"player\"></player-component>\n        <div class=\"other-players-box\">\n            <!-- TODO. could move this into a child component if time permits -->\n            <i class=\"fa fa-users fa-2x\" aria-hidden=\"true\"> </i> \n            <div *ngFor=\"let p of otherPlayers\">\n                <div *ngIf=\"p && p.playerId != _multiplayerService.playerId\" class=\"other-player\" >\n                    {{p.currentLetter || \"?\"}}\n                </div>\n            </div>\n        </div>\n        <section class=\"board\">\n            <div *ngFor=\"let row of gridCells\" class=\"board-row\">\n                <div *ngFor=\"let cell of row\" (click)=\"cellClicked(cell)\" [ngClass]=\"getClass(cell)\">\n                    {{getContent(cell)}}\n                </div>\n            </div>\n        </section>\n    "
                     }), 
                     __metadata('design:paramtypes', [multiplayer_service_1.MultiplayerService])
                 ], BoardComponent);

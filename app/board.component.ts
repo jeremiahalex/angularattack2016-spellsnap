@@ -5,20 +5,20 @@ import {Player} from './player';
 import {Word} from './word';
 import {VALID_WORDS} from './words';
 
-const ROW_COUNT = 9;
-const COLUMN_COUNT = 9;
+const ROW_COUNT = 18;   //TODO. these should match the server, best to pull them from their
+const COLUMN_COUNT = 18;
 const SCORE_PER_LETTER = 2;
 const REMOVE_DELAY_INC = 50;//ms
 const DOUBLE_MATCH_MULTIPLIER = 2; //bonus if end two words at once
 
-const enum CELL_STATE { Empty, Using, Used, Removing, Removed }
+const enum ANIMATION_STATE { Empty, Using, Used, Effecting, Removing, Removed }
 
 interface GridCell {
   y: number;
   x: number;
   starter: boolean;
   content: string;
-  state: CELL_STATE;
+  state: ANIMATION_STATE;
   wordAcross: Word;
   wordDown: Word;
 }
@@ -28,10 +28,19 @@ interface GridCell {
     directives: [PlayerComponent],
     template: `
         <player-component [player]="player"></player-component>
+        <div class="other-players-box">
+            <!-- TODO. could move this into a child component if time permits -->
+            <i class="fa fa-users fa-2x" aria-hidden="true"> </i> 
+            <div *ngFor="let p of otherPlayers">
+                <div *ngIf="p && p.playerId != _multiplayerService.playerId" class="other-player" >
+                    {{p.currentLetter || "?"}}
+                </div>
+            </div>
+        </div>
         <section class="board">
             <div *ngFor="let row of gridCells" class="board-row">
                 <div *ngFor="let cell of row" (click)="cellClicked(cell)" [ngClass]="getClass(cell)">
-                    {{cell.content}}
+                    {{getContent(cell)}}
                 </div>
             </div>
         </section>
@@ -41,9 +50,9 @@ export class BoardComponent implements OnInit {
     player : Player;
     gridCells : GridCell[][];
     loading : boolean; //this should prob be bound to the service
+    otherPlayers : any[];
     
     constructor(private _multiplayerService: MultiplayerService) {
-        console.log(_multiplayerService.test());
         this.loading = true;
     }
     
@@ -51,33 +60,36 @@ export class BoardComponent implements OnInit {
         //make a new player
         this.player = new Player();
         
-        //make the grid
+        this.otherPlayers = [];
+        //get grid values from the server
+        this._multiplayerService.registerCallbacks( 
+            this.buildGrid.bind(this), 
+            this.updateGrid.bind(this), 
+            this.letterAccepted.bind(this), 
+            this.letterRejected.bind(this),
+            this.playersUpdate.bind(this),
+            this.rankUpdate.bind(this), 
+            this.claimAccepted.bind(this), 
+            this.claimRejected.bind(this)
+            );
+    }
+    
+    buildGrid( grid: any ) {
+        //reset the player
+        this.player.reset();
+        
+        //clear the grid
         this.gridCells = [];
         
-        //TODO. get grid values from the server
         for ( let y = 0; y < ROW_COUNT; ++y){
             this.gridCells[y] = [];
             for ( let x = 0; x < COLUMN_COUNT; ++x){
-                this.gridCells[y][x] = { x: x, y: y, starter: false, content: "", wordAcross: null, wordDown: null, state: CELL_STATE.Empty };
-                //temp - we will read the cell values from the server but for now we're just testing our grid, so manuall add 
-                if ( x % 3 === 1 && y % 3 === 1 ){
-                    //a valid starter cell
-                    this.gridCells[y][x].starter = true;
-                }
-                
-                //some default cells to spell the title
-                if ( x === 1 && y === 1 ) this.gridCells[y][x].content =  "s"
-                else if ( x === 2 && y === 1 ) this.gridCells[y][x].content =  "p"
-                else if ( x === 3 && y === 1 ) this.gridCells[y][x].content =  "e"
-                else if ( x === 4 && y === 1 ) this.gridCells[y][x].content =  "l"
-                else if ( x === 5 && y === 1 ) this.gridCells[y][x].content =  "l"
-                else if ( x === 1 && y === 2 ) this.gridCells[y][x].content =  "n"
-                else if ( x === 1 && y === 3 ) this.gridCells[y][x].content =  "a"
-                else if ( x === 1 && y === 4 ) this.gridCells[y][x].content =  "p"
+                let c = grid[y][x];
+                this.gridCells[y][x] = { x: c.x, y: c.y, starter: c.starter, content: c.content, wordAcross: null, wordDown: null, state: ANIMATION_STATE.Empty };
             }
         }
-        
         this.findAllWords();
+        
     }
     
     removeConnectedLetters(x,y, delay) {
@@ -89,10 +101,10 @@ export class BoardComponent implements OnInit {
         
         //else set content to zero and try all four neighbours
         setTimeout( () => {
-            this.gridCells[y][x].state = CELL_STATE.Removed;
+            this.gridCells[y][x].state = ANIMATION_STATE.Removed;
         }, delay);
         this.gridCells[y][x].content = ""; 
-        this.gridCells[y][x].state = CELL_STATE.Removing;
+        this.gridCells[y][x].state = ANIMATION_STATE.Removing;
         
         delay += REMOVE_DELAY_INC;
         this.removeConnectedLetters(x+1,y, delay);
@@ -143,6 +155,8 @@ export class BoardComponent implements OnInit {
         
         this.loading = false;
         console.log('words found ', words);
+        
+        this._multiplayerService.sendStats(this.player.score, this.player.currentLetter);
     }
     
     makeWord(word:Word, x:number, y:number, downwards:boolean = false) {
@@ -204,8 +218,14 @@ export class BoardComponent implements OnInit {
         return false; 
     }
     
+    getContent(cell: GridCell) {
+        if ( cell.content ) return cell.content;
+        if ( cell.starter ) return "*";
+        return "";
+    }
+    
     getClass(cell: GridCell) {
-        if ( cell.state === CELL_STATE.Removing ) return "board-cell used";
+        if ( cell.state === ANIMATION_STATE.Removing ) return "board-cell used";
         if ( cell.content ) return "board-cell used";
         if ( cell.starter ) return "board-cell starter";
         return "board-cell";
@@ -221,25 +241,40 @@ export class BoardComponent implements OnInit {
     
     addLetter(cell: GridCell, letter : string) {
         console.log('adding new letter');
+        //send message to server, disable input until result
         this.loading = true;
-        //TODO. send message to server, disable input until result
-        cell.content = this.player.currentLetter;
-        cell.state = CELL_STATE.Used; //Using
+        cell.state = ANIMATION_STATE.Using;
+        this._multiplayerService.addLetter(cell.x, cell.y, this.player.currentLetter);
+    }
+    letterAccepted(result:any) {
+        
+        this.gridCells[result.y][result.x].content = result.letter;
+        this.gridCells[result.y][result.x].state = ANIMATION_STATE.Used;
         
         this.player.score += SCORE_PER_LETTER;
         
         this.player.nextTurn();
         this.findAllWords();
     }
+    letterRejected(result:any) {
+        this.gridCells[result.y][result.x].state = ANIMATION_STATE.Empty;
+        
+        this.findAllWords();
+    }
+    updateGrid(result:any) {
+        this.gridCells[result.y][result.x].content = result.letter;
+        //To ensure cells are deleted we change them all to exclaimation marks - a bit of a hack but might actually look ok
+        if ( result.cells ) {
+            result.cells.forEach( (cell)=> {
+                this.gridCells[cell.y][cell.x].content = "!";
+            })
+        }
+        this.findAllWords();
+    }
     
     claimPoints(cell: GridCell, across:number, down:number) {
         if ( !across && !down ) return;
         console.log('claiming word/s - points ' + across + " & " + down);
-        this.loading = true;
-        
-        //TODO. send message to server, disable input until result
-        cell.content = this.player.currentLetter;
-        cell.state = CELL_STATE.Used; //using
         
         var score = across + down;
         if ( across && down ) {
@@ -247,9 +282,57 @@ export class BoardComponent implements OnInit {
             console.log('multiplier applied: ', score); 
         }
         
-        this.player.score += score;
+        //logic is currently client side so we need to tell the server what cells to remove
+        var cells = [];
+        this.findEffectedCells(cells, cell.x, cell.y, true);
+        
+        console.log('cells: ', cells); 
+        
+        this.loading = true;
+        cell.state = ANIMATION_STATE.Using;
+        this._multiplayerService.claimWord(cell.x, cell.y, cells, score);
+    }
+    
+    findEffectedCells(cells, x, y, first) {
+        console.log('checking: %s %s', x, y); 
+        //end if exceeds grid return
+        if ( x >= COLUMN_COUNT || y >= ROW_COUNT || x < 0 || y < 0 ) return;
+        
+        //if the cell is empty return
+        if ( !first && ( !this.gridCells[y][x].content || this.gridCells[y][x].state == ANIMATION_STATE.Effecting) ) return;
+        //mark it as using to
+        this.gridCells[y][x].state = ANIMATION_STATE.Effecting;
+        
+        //else add to the list
+        cells.push({ x: x, y: y});
+        this.findEffectedCells(cells, x+1,y, false);
+        this.findEffectedCells(cells, x-1,y, false);
+        this.findEffectedCells(cells, x,y+1, false);
+        this.findEffectedCells(cells, x,y-1, false);
+    }
+    
+    claimAccepted(result:any) {
+        console.log("claimed ", result);
+        this.gridCells[result.y][result.x].content = "!";
+        this.gridCells[result.y][result.x].state = ANIMATION_STATE.Used;
+        
+        this.player.score += result.score;
+        
         this.player.nextTurn();
         this.findAllWords();
+    }
+    claimRejected(result:any) {
+        this.gridCells[result.y][result.x].state = ANIMATION_STATE.Empty;
+        this.findAllWords();
+    }
+    
+    playersUpdate(result:any) {
+        console.log("players updated: ", result);
+        this.otherPlayers = result;
+    }
+    rankUpdate(result:any) {
+        this.player.rank = result.rank;
+        console.log("rank updated: ", result);
     }
     
     cellClicked(cell: GridCell) {

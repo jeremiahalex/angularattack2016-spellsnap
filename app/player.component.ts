@@ -12,12 +12,16 @@ import {Player} from './player';
                         {{timeTillNextTurn()}}
                     </div>
                 </div>
-                <button (click)="trashLetter()" [disabled]="!player.ready" >skip</button>
-                <div class="next-letter">{{player.nextLetter}}</div>
+                <div [ngClass]="btnClass()" (click)="trashLetter()"><i class="fa fa-trash fa-3x" aria-hidden="true"></i></div>
+                <div class="next-letter">
+                    {{player.nextLetter}}
+                    <div *ngIf="!player.ready" class="time-till">
+                    </div>
+                </div>
             </div>
             <div class="player-stats">
                 <h1 class="player-score">{{player.score}}<small> PTS</small></h1>
-                <p class="player-rank">RANK: {{playerRaking()}}</p>
+                <p *ngIf="player.rank >= 0" class="player-rank">RANK {{player.rank+1}}</p>
             </div>
         </section>
     `
@@ -37,11 +41,13 @@ export class PlayerComponent implements OnInit  {
         return Math.round( this.player.timeRemaining() / 1000 );
     }
     
-    playerRaking(){
-        return `1 / 1`; //TODO. get this from a service from the server
+    btnClass() {
+        if (!this.player.ready) return "btn btn-disabled";
+        return "btn";
     }
-    
     trashLetter(){
+        if (!this.player.ready) return;
+        
         console.log('trash clicked');
         this.player.skipTurn();
     }

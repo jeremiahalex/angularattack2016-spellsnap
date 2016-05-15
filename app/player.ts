@@ -1,5 +1,5 @@
-const TURN_TIME             = 50; //milliseconds
-const TRASH_PENALTY_TIME    = 50;
+const TURN_TIME             = 2000; //milliseconds //TODO. change back to 5000
+const TRASH_PENALTY_TIME    = 2000;
 const EXCLAIMATION_CHANCE   = 0.2;
 const ALPHABET              = 'abcdefghijklmnopqrstuvwxyz';
 
@@ -11,13 +11,19 @@ export class Player {
     ready           : boolean;
     lastUpdateTime  : number;
     interval        : number;
+    rank            : number;
     
     constructor() {
+        this.reset();
+    }
+    
+    reset() {
         this.currentLetter = this.randomLetter();
         this.nextLetter = this.randomLetter();
         this.timeTillTurn = 0;
         this.score = 0;
         this.ready = true;
+        this.rank = -1;
     }
     
     beignGame() {

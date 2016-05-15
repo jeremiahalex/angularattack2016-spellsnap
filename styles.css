@@ -1,15 +1,30 @@
+@import url(https://fonts.googleapis.com/css?family=Lato:400,300,700);
+
 * {
   box-sizing: border-box;
 }
 
 body {
-  background-color: antiquewhite;
+  margin: 0;
+  padding: 0;
+  font-family: 'Lato', sans-serif;
+  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#eaaacf+0,efeaca+50,a0deed+100 */
+  background: #eaaacf; /* Old browsers */
+  background: -moz-linear-gradient(-45deg,  #eaaacf 0%, #efeaca 50%, #a0deed 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(-45deg,  #eaaacf 0%,#efeaca 50%,#a0deed 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(135deg,  #eaaacf 0%,#efeaca 50%,#a0deed 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eaaacf', endColorstr='#a0deed',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 .board {
+  min-width: 960px;
   text-align: center;
   font-size: 1.4vmax;
   font-weight: bold;
   padding-top: 110px;
+  padding-bottom: 50px;
 }
 
 .board-row {
@@ -18,90 +33,155 @@ body {
   text-align: center;
 }
 .board-cell {
-  background-color: antiquewhite;
-  border: 2px solid bisque;
-  width: 10%;
-  /* vertical height trick, proportion of width - not perfect but will do for now */
-  padding-bottom: 5%;
-  padding-top: 5%;
+  text-transform: uppercase;
+  border: 1px solid white;
+  width: 80px;
+  height: 80px;
+  min-width: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5vmax;
+  font-weight: bold;
+  transition: background-color 0.5s ease;
+}
+
+.board-cell.starter {
+  background-color: rgba(255, 255, 255, .3);
+  /*border: 1px solid darkgoldenrod;*/
+}
+.board-cell:hover {
+  background-color: whitesmoke;
 }
 
 .board-cell.used {
-  background-color: bisque;
-  border: 2px solid darkgoldenrod;
-}
-.board-cell.starter {
-  background-color: beige;
-  border: 1px solid darkgoldenrod;
+  background-color: white;
+  border: 1px solid whitesmoke;
 }
 
+.btn {
+  background-color: transparent;
+  border: 0;
+  height: 90px;
+  width: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+.btn-disabled {
+  color: grey;
+}
+.fa-users {
+  width: 50px;
+  height: 100%;
+  -webkit-text-stroke: 1px white;
+}
+.fa-trash {
+  -webkit-text-stroke: 1px white;
+}
+.loading-frame {
+  width: 100%;
+  height: 100%;
+  padding: 120px;
+  text-align: center;
+}
+
+.other-players-box {
+  background-color: rgba(255, 255, 255, .5);
+  display: flex;
+  flex-wrap: wrap;
+  position: fixed;
+  bottom: 5px;
+  overflow: hidden;
+  max-height: 100px;
+  width: 100%;
+  padding-left: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  align-items: center;
+}
+.other-player {
+  text-transform: uppercase;
+  background-color: rgba(255, 255, 255, .7);
+  color: rgba(0, 0, 0, .8);
+  border: 1px solid whitesmoke;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  margin-left: 10px;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5vmax;
+  font-weight: bold;
+}
 .player-box {
   display: flex;
   justify-content: space-between;
   background-color: rgba(255, 255, 255, .5);
-  /*border: 2px solid darkgray;*/
   position: fixed;
   width: 100%;
+  height: 90px;
+  left: 0px;
+  top: 5px;
+  padding: 5px;
 }
 .player-actions {
   display: flex;
-  align-items: center;
-  /*background-color: gray;*/
+  align-items: flex-end;
   text-align: center;
-  padding: 10px;
+  height: 80px;
 }
 .player-stats {
+  display: flex;
+  flex-direction: column;
   text-align: right;
-  /*background-color: white;*/
-  padding-right: 20px;
+  align-items: flex-end;
+  justify-content: flex-end;
 }
-
+h1 {
+  margin-bottom: 5px;
+}
+p {
+  margin: 0px;
+}
 .current-letter {
-    width: 25vw;
-    height: 25vw;
-    max-width: 100px;
-    max-height: 100px;
+    width: 80px;
+    height: 80px;
     display: flex;
     position: relative;
     justify-content: center;
     align-items: center;
-    background-color: bisque;
+    background-color: white;
     border: 2px solid black;
     font-size: 2vmax;
     font-weight: bold;
+    text-transform: uppercase;
 }
 
 .time-till {
-    background-color: rgba(0, 0, 0, .5);
-    color: white;
+    background-color: rgba(255, 255, 255, .8);
+    color: gray;
     width: 100%;
     height: 100%;
     position: absolute;
     top: 0;
     left: 0;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: flex-end;
+    align-items: flex-end;
+    padding: 5px;
 }
 
 
 .next-letter {
-    width: 20vw;
-    height: 20vw;
-    max-width: 80px;
-    max-height: 80px;
-    background-color: white;
+    width: 70px;
+    height: 70px;
+    background-color: whitesmoke;
     display: flex;
+    position: relative;
     justify-content: center;
     align-items: center;
     font-size: 1.5vmax;
     font-weight: bold;
+    text-transform: uppercase;
 }
-/*
-
-.next-letter
-
-h1.player-score
-
-h2.player-rank*/
-/*TODO. add responsiveness */

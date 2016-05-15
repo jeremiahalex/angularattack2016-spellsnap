@@ -5,18 +5,22 @@ System.register([], function(exports_1, context_1) {
     return {
         setters:[],
         execute: function() {
-            TURN_TIME = 50; //milliseconds
-            TRASH_PENALTY_TIME = 50;
+            TURN_TIME = 2000; //milliseconds //TODO. change back to 5000
+            TRASH_PENALTY_TIME = 2000;
             EXCLAIMATION_CHANCE = 0.2;
             ALPHABET = 'abcdefghijklmnopqrstuvwxyz';
             Player = (function () {
                 function Player() {
+                    this.reset();
+                }
+                Player.prototype.reset = function () {
                     this.currentLetter = this.randomLetter();
                     this.nextLetter = this.randomLetter();
                     this.timeTillTurn = 0;
                     this.score = 0;
                     this.ready = true;
-                }
+                    this.rank = -1;
+                };
                 Player.prototype.beignGame = function () {
                     var _this = this;
                     //clear interval if one.

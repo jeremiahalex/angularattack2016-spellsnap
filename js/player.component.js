@@ -30,10 +30,14 @@ System.register(['@angular/core', './player'], function(exports_1, context_1) {
                 PlayerComponent.prototype.timeTillNextTurn = function () {
                     return Math.round(this.player.timeRemaining() / 1000);
                 };
-                PlayerComponent.prototype.playerRaking = function () {
-                    return "1 / 1"; //TODO. get this from a service from the server
+                PlayerComponent.prototype.btnClass = function () {
+                    if (!this.player.ready)
+                        return "btn btn-disabled";
+                    return "btn";
                 };
                 PlayerComponent.prototype.trashLetter = function () {
+                    if (!this.player.ready)
+                        return;
                     console.log('trash clicked');
                     this.player.skipTurn();
                 };
@@ -44,7 +48,7 @@ System.register(['@angular/core', './player'], function(exports_1, context_1) {
                 PlayerComponent = __decorate([
                     core_1.Component({
                         selector: 'player-component',
-                        template: "\n        <section class=\"player-box\">\n            <div class=\"player-actions\">\n                <div class=\"current-letter\">\n                    {{player.currentLetter}}\n                    <div *ngIf=\"!player.ready\" class=\"time-till\">\n                        {{timeTillNextTurn()}}\n                    </div>\n                </div>\n                <button (click)=\"trashLetter()\" [disabled]=\"!player.ready\" >skip</button>\n                <div class=\"next-letter\">{{player.nextLetter}}</div>\n            </div>\n            <div class=\"player-stats\">\n                <h1 class=\"player-score\">{{player.score}}<small> PTS</small></h1>\n                <p class=\"player-rank\">RANK: {{playerRaking()}}</p>\n            </div>\n        </section>\n    "
+                        template: "\n        <section class=\"player-box\">\n            <div class=\"player-actions\">\n                <div class=\"current-letter\">\n                    {{player.currentLetter}}\n                    <div *ngIf=\"!player.ready\" class=\"time-till\">\n                        {{timeTillNextTurn()}}\n                    </div>\n                </div>\n                <div [ngClass]=\"btnClass()\" (click)=\"trashLetter()\"><i class=\"fa fa-trash fa-3x\" aria-hidden=\"true\"></i></div>\n                <div class=\"next-letter\">\n                    {{player.nextLetter}}\n                    <div *ngIf=\"!player.ready\" class=\"time-till\">\n                    </div>\n                </div>\n            </div>\n            <div class=\"player-stats\">\n                <h1 class=\"player-score\">{{player.score}}<small> PTS</small></h1>\n                <p *ngIf=\"player.rank >= 0\" class=\"player-rank\">RANK {{player.rank+1}}</p>\n            </div>\n        </section>\n    "
                     }), 
                     __metadata('design:paramtypes', [])
                 ], PlayerComponent);
