@@ -7,6 +7,7 @@ export class MultiplayerService {
     players : any;
     rank : any;
     playerId : string;
+    timeLeft : number;
     
     gridCallback : Function;
     updateCallback : Function;
@@ -16,6 +17,7 @@ export class MultiplayerService {
     rankCallback : Function;
     claimAcceptedCallback : Function;
     claimRejectedCallback : Function;
+    timeUpdatedCallback : Function;
     
     
     constructor() {
@@ -59,6 +61,12 @@ export class MultiplayerService {
             this.playerId = playerId;
         });
         
+        this.socket.on("time", (timeLeft) => {
+            console.log("Received time ", timeLeft);
+            this.timeLeft = timeLeft;
+            if ( this.timeUpdatedCallback ) this.timeUpdatedCallback(timeLeft);
+        });
+        
         this.socket.on("update", (update) => {
             console.log("Received update ", update);
             if ( this.updateCallback ) this.updateCallback(update);
@@ -91,7 +99,7 @@ export class MultiplayerService {
     
     //we register callbacks for each socket event, we could use observables I suppose but too tired to work that out
     registerCallbacks( gridCallback, updateCallback, letterAcceptedCallback, letterRejectedCallback, playersCallback, rankCallback
-    , claimAcceptedCallback, claimRejectedCallback ) {
+    , claimAcceptedCallback, claimRejectedCallback, timeUpdatedCallback ) {
         this.gridCallback = gridCallback;
         this.updateCallback = updateCallback;
         this.letterAcceptedCallback = letterAcceptedCallback;
@@ -100,6 +108,7 @@ export class MultiplayerService {
         this.rankCallback = rankCallback;
         this.claimAcceptedCallback = claimAcceptedCallback;
         this.claimRejectedCallback = claimRejectedCallback;
+        this.timeUpdatedCallback = timeUpdatedCallback; 
         //we may already have the grid, if so return it, so they can begin the game
         if ( this.grid && this.grid.length > 0 ) this.gridCallback(this.grid);
     }

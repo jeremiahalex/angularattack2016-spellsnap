@@ -28,7 +28,12 @@ System.register(['@angular/core', './player'], function(exports_1, context_1) {
                     this.player.beignGame();
                 };
                 PlayerComponent.prototype.timeTillNextTurn = function () {
-                    return Math.round(this.player.timeRemaining() / 1000);
+                    return Math.round(this.player.timeTillTurn / 1000);
+                };
+                PlayerComponent.prototype.timeLeft = function () {
+                    if (this.player.timeLeft <= 0)
+                        return "0";
+                    return new Date(this.player.timeLeft).getMinutes().toString();
                 };
                 PlayerComponent.prototype.btnClass = function () {
                     if (!this.player.ready)
@@ -48,7 +53,7 @@ System.register(['@angular/core', './player'], function(exports_1, context_1) {
                 PlayerComponent = __decorate([
                     core_1.Component({
                         selector: 'player-component',
-                        template: "\n        <section class=\"player-box\">\n            <div class=\"player-actions\">\n                <div class=\"current-letter\">\n                    {{player.currentLetter}}\n                    <div *ngIf=\"!player.ready\" class=\"time-till\">\n                        {{timeTillNextTurn()}}\n                    </div>\n                </div>\n                <div [ngClass]=\"btnClass()\" (click)=\"trashLetter()\"><i class=\"fa fa-trash fa-3x\" aria-hidden=\"true\"></i></div>\n                <div class=\"next-letter\">\n                    {{player.nextLetter}}\n                    <div *ngIf=\"!player.ready\" class=\"time-till\">\n                    </div>\n                </div>\n            </div>\n            <div class=\"player-stats\">\n                <h1 class=\"player-score\">{{player.score}}<small> PTS</small></h1>\n                <p *ngIf=\"player.rank >= 0\" class=\"player-rank\">RANK {{player.rank+1}}</p>\n            </div>\n        </section>\n    "
+                        template: "\n        <section class=\"player-box\">\n            <div class=\"player-actions\">\n                <div class=\"current-letter\">\n                    {{player.currentLetter}}\n                    <div *ngIf=\"!player.ready\" class=\"time-till\">\n                        {{timeTillNextTurn()}}\n                    </div>\n                </div>\n                <div [ngClass]=\"btnClass()\" (click)=\"trashLetter()\"><i class=\"fa fa-trash fa-3x\" aria-hidden=\"true\"></i></div>\n                <div class=\"next-letter\">\n                    {{player.nextLetter}}\n                    <div *ngIf=\"!player.ready\" class=\"time-till\">\n                    </div>\n                </div>\n            </div>\n            <div class=\"player-stats\">\n                <h1 class=\"player-score\">{{player.score}}<small> PTS</small></h1>\n                <p *ngIf=\"player.rank >= 0\" class=\"player-rank\">RANK {{player.rank+1}}</p>\n                <p class=\"time-left\"><small>game ends in </small>{{timeLeft()}} <small>mins</small></p>\n            </div>\n        </section>\n    "
                     }), 
                     __metadata('design:paramtypes', [])
                 ], PlayerComponent);

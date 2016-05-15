@@ -22,6 +22,7 @@ import {Player} from './player';
             <div class="player-stats">
                 <h1 class="player-score">{{player.score}}<small> PTS</small></h1>
                 <p *ngIf="player.rank >= 0" class="player-rank">RANK {{player.rank+1}}</p>
+                <p class="time-left"><small>game ends in </small>{{timeLeft()}} <small>mins</small></p>
             </div>
         </section>
     `
@@ -38,7 +39,12 @@ export class PlayerComponent implements OnInit  {
     }
     
     timeTillNextTurn(){
-        return Math.round( this.player.timeRemaining() / 1000 );
+        return Math.round( this.player.timeTillTurn / 1000 );
+    }
+    timeLeft(){
+        if ( this.player.timeLeft <= 0 ) return "0"
+        
+        return new Date(this.player.timeLeft).getMinutes().toString();
     }
     
     btnClass() {

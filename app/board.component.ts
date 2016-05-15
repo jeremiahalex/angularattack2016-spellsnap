@@ -85,10 +85,14 @@ export class BoardComponent implements OnInit {
             this.playersUpdate.bind(this),
             this.rankUpdate.bind(this), 
             this.claimAccepted.bind(this), 
-            this.claimRejected.bind(this)
+            this.claimRejected.bind(this),
+            this.timeUpdated.bind(this)
             );
     }
     
+    timeUpdated(timeLeft) {
+        this.player.timeLeft = timeLeft;
+    }
     buildGrid( grid: any ) {
         //reset the player
         this.player.reset();

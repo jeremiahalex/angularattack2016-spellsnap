@@ -19,6 +19,7 @@ System.register([], function(exports_1, context_1) {
                     this.score = 0;
                     this.ready = true;
                     this.rank = -1;
+                    this.timeLeft = 0;
                 };
                 Player.prototype.beignGame = function () {
                     var _this = this;
@@ -36,11 +37,11 @@ System.register([], function(exports_1, context_1) {
                                 _this.ready = true;
                             }
                         }
+                        //we also update the game time here, rather than create a new interval
+                        if (_this.timeLeft > 0)
+                            _this.timeLeft -= dt;
                         _this.lastUpdateTime = timeNow;
                     }, 500);
-                };
-                Player.prototype.timeRemaining = function () {
-                    return this.timeTillTurn;
                 };
                 //Could move to the following logic serverside for a more secure game but this is a hack, so no need to worry about cheaters
                 Player.prototype.randomLetter = function () {

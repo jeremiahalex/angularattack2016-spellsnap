@@ -49,7 +49,10 @@ System.register(['@angular/core', './player.component', './multiplayer.service',
                     this.player = new player_1.Player();
                     this.otherPlayers = [];
                     //get grid values from the server
-                    this._multiplayerService.registerCallbacks(this.buildGrid.bind(this), this.updateGrid.bind(this), this.letterAccepted.bind(this), this.letterRejected.bind(this), this.playersUpdate.bind(this), this.rankUpdate.bind(this), this.claimAccepted.bind(this), this.claimRejected.bind(this));
+                    this._multiplayerService.registerCallbacks(this.buildGrid.bind(this), this.updateGrid.bind(this), this.letterAccepted.bind(this), this.letterRejected.bind(this), this.playersUpdate.bind(this), this.rankUpdate.bind(this), this.claimAccepted.bind(this), this.claimRejected.bind(this), this.timeUpdated.bind(this));
+                };
+                BoardComponent.prototype.timeUpdated = function (timeLeft) {
+                    this.player.timeLeft = timeLeft;
                 };
                 BoardComponent.prototype.buildGrid = function (grid) {
                     //reset the player

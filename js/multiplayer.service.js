@@ -57,6 +57,12 @@ System.register(['@angular/core'], function(exports_1, context_1) {
                         console.log("Received playerId ", playerId);
                         _this.playerId = playerId;
                     });
+                    this.socket.on("time", function (timeLeft) {
+                        console.log("Received time ", timeLeft);
+                        _this.timeLeft = timeLeft;
+                        if (_this.timeUpdatedCallback)
+                            _this.timeUpdatedCallback(timeLeft);
+                    });
                     this.socket.on("update", function (update) {
                         console.log("Received update ", update);
                         if (_this.updateCallback)
@@ -87,7 +93,7 @@ System.register(['@angular/core'], function(exports_1, context_1) {
                     });
                 }
                 //we register callbacks for each socket event, we could use observables I suppose but too tired to work that out
-                MultiplayerService.prototype.registerCallbacks = function (gridCallback, updateCallback, letterAcceptedCallback, letterRejectedCallback, playersCallback, rankCallback, claimAcceptedCallback, claimRejectedCallback) {
+                MultiplayerService.prototype.registerCallbacks = function (gridCallback, updateCallback, letterAcceptedCallback, letterRejectedCallback, playersCallback, rankCallback, claimAcceptedCallback, claimRejectedCallback, timeUpdatedCallback) {
                     this.gridCallback = gridCallback;
                     this.updateCallback = updateCallback;
                     this.letterAcceptedCallback = letterAcceptedCallback;
@@ -96,6 +102,7 @@ System.register(['@angular/core'], function(exports_1, context_1) {
                     this.rankCallback = rankCallback;
                     this.claimAcceptedCallback = claimAcceptedCallback;
                     this.claimRejectedCallback = claimRejectedCallback;
+                    this.timeUpdatedCallback = timeUpdatedCallback;
                     //we may already have the grid, if so return it, so they can begin the game
                     if (this.grid && this.grid.length > 0)
                         this.gridCallback(this.grid);

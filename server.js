@@ -2,6 +2,7 @@
 
 const ROW_COUNT     = 36;
 const COLUMN_COUNT  = 18;
+const GAME_TIME     = 900000; //ms ~ 15mins
 const express       = require("express");
 const http          = require("http");
 const app           = express();
@@ -12,6 +13,10 @@ const connections   = [];
 
 var players         = {};
 var gridCells       = [];
+
+var interval;
+var timeLeft;
+var lastUpdateTime;
 
 function resetGame() {
   console.log("resetting game");
@@ -38,6 +43,25 @@ function resetGame() {
   }
   //tell any connected players to reset
   io.sockets.emit("grid", gridCells);
+  
+  //set a timer to reset the game every x
+  if ( interval ) clearInterval(interval);
+  lastUpdateTime = new Date().getTime();
+  timeLeft = GAME_TIME;
+  io.sockets.emit("time", timeLeft);
+  
+  interval = setInterval( () => {   
+      var timeNow = new Date().getTime();
+      var dt = timeNow - lastUpdateTime;
+      
+      timeLeft -= dt;
+      if ( timeLeft <= 0 ) {
+          resetGame();
+          return;
+      }
+      
+      lastUpdateTime = timeNow;
+  },500);
 }
 
 resetGame();
@@ -94,6 +118,9 @@ io.on("connection", (socket) => {
   }
   //send a first message with the current state of the grid
   socket.emit("grid", gridCells);
+  
+  //tell them the time left
+  socket.emit("time", timeLeft);
   
   //tell the player their id
   socket.emit("playerId", socket.id);

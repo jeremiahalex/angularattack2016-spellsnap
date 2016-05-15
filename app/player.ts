@@ -11,6 +11,7 @@ export class Player {
     lastUpdateTime  : number;
     interval        : number;
     rank            : number;
+    timeLeft        : number;
     
     constructor() {
         this.reset();
@@ -23,6 +24,7 @@ export class Player {
         this.score = 0;
         this.ready = true;
         this.rank = -1;
+        this.timeLeft = 0;
     }
     
     beignGame() {
@@ -43,13 +45,13 @@ export class Player {
                 }
             }
             
+            //we also update the game time here, rather than create a new interval
+            if ( this.timeLeft > 0 ) this.timeLeft -= dt;
+            
             this.lastUpdateTime = timeNow;
         },500);
     }
     
-    timeRemaining():number {
-        return this.timeTillTurn;
-    }
       //Could move to the following logic serverside for a more secure game but this is a hack, so no need to worry about cheaters
     randomLetter():string{
         return ALPHABET.charAt(Math.floor(Math.random() * ALPHABET.length));
