@@ -54,4 +54,5 @@ System.register(['@angular/core', './player'], function(exports_1, context_1) {
         }
     }
 });
+
 //# sourceMappingURL=player.component.js.map

@@ -38,4 +38,5 @@ System.register(['@angular/core', './board.component'], function(exports_1, cont
         }
     }
 });
+
 //# sourceMappingURL=app.component.js.map

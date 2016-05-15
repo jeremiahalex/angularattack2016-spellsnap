@@ -328,4 +328,5 @@ System.register(['@angular/core', './player.component', './player', './word', '.
         }
     }
 });
+
 //# sourceMappingURL=board.component.js.map

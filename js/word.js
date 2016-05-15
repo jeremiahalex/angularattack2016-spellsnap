@@ -27,4 +27,5 @@ System.register([], function(exports_1, context_1) {
         }
     }
 });
+
 //# sourceMappingURL=word.js.map
