@@ -43,10 +43,14 @@ function resetGame() {
 resetGame();
 
 app.get('/', (req, res) => {
+  
+   var portString = "";
+   if ( req.hostname == "localhost" ) portString += `:${port}`;
+   
    res.send(`
     <h1>Spell SNAP! Server</h1>
     <p>${Object.keys(players).length} Players.</p>
-    <a href="${req.protocol}://${req.hostname}:${port}/reset">RESET</a>
+    <a href="${req.protocol}://${req.hostname}${portString}/reset">RESET</a>
    `); 
 });
 

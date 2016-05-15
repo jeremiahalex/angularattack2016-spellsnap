@@ -23,8 +23,10 @@ export class MultiplayerService {
         this.playerId = "";
         
         //create socket io connection
-        this.socket = io("http://localhost:3000"); 
-        //this.socket = io("https://spellsnap.herokuapp.com"); 
+        if (document.location.hostname == "localhost")
+            this.socket = io("http://localhost:3000");
+        else 
+            this.socket = io("https://spellsnap.herokuapp.com");
         
         //listen for events
         this.socket.on("connect", () => {
