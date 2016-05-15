@@ -1,48 +1,29 @@
-# This is your [AngularAttack](https://www.angularattack.com) 2016 Repo
+# Spell SNAP!
 
-This repo is the start of your AngularAttack 2016 entry. It contains the simple [Angular2 starter](https://angular.io/docs/ts/latest/quickstart.html) files.
+**An original real-time multiplayer word game, devised, designed and developed in less than 48 hours by [Jeremiah Lazarus Alexander](https://github.com/jeremiahalex) for the [2016 AngularAttack](https://www.angularattack.com) Global Hackathon.**
 
-**DO NOT MAKE ANY CODE CHECKINS TO THIS REPOSITORY BEFORE THE COMPETITION OFFICIALLY BEGINS.**
+**[Play it Now!](https://spellsnap.2016.angularattack.io)**
 
-**DOING SO COULD DISQUALIFY YOU.**
+![Spell Snap Screenshot](img/spell-snap.jpg)
 
+### How To Play
 
-However, before the competition starts, there are some things we encourage you to do to get prepared for the competition.
+* Place Letters on the Grid to spell out words 
+* Letters can be placed alone on an * or next to letterz where they could lead to a valid word
+* Complete words by placing an ! at the end - the longer the word the more points
+* Trash letters you can't use for a small time penalty
 
+### Multiplayer
 
-### Step 1) Get Your Local Environment setup
+* Automatically join the same game as others from across the world
+* The board resets every 15 minutes, so score as many points before then as you can
 
-Clone this repo locally, and make sure all your team members have access to it.
+### Build
 
-* Install the latest [Node / NPM](https://nodejs.org).
+* The frontend is AngularJS 2 written in Typescript, hosted on (Surge)(https://spellsnap.2016.angularattack.io)
+* The backend is a simple NodeJS server, hosted on [Heroku](https://spellsnap.herokuapp.com)
+* The two communicate via Socket.io
 
-* `git clone git@github.com:rumblex/angularattack2016-spellsnap.git`
-
-* `cd angularattack2016-spellsnap`
-
-* `npm install`
-
-* `npm start` will start the server locally to test that everything is running correctly
-
-
-### Step 2) Deploy Your App
-
-While you can't make any checkins before the comp, what you **can** do right now is deploy this sample app to [Surge](https://surge.sh) (our competition hosting provider).
-
-* `npm install -g surge`
-
-* `surge .`
-
-Note: please do not remove the `CNAME` file, as that tells it where to deploy to.
-
-If you receive an error message `"You do not have permission to publish to spellsnap.2016.angularattack.io"`, it might mean another team member has already deployed your project to Surge. Ask them to run the next step to give you access.
-
-### Step 3) Add Your Team Members to Surge
-
-* `surge . --add Jeremiah@ideonic.com`
-
-
-### Step 4) Wait til competition starts
-
-It begins at exactly [May 14 at 00:00 UTC](https://www.wolframalpha.com/input/?i=May+14,+2016+0:00+UTC). Once the competition starts,   you can write over this project.
-
+### Support 
+* There is an [emergency button](https://spellsnap.herokuapp.com) to restart the game, if there is a problem or you just can't be bothered to wait 15 minutes. 
+* Anything else please contact me.
