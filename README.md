@@ -8,7 +8,7 @@
 
 ### How To Play
 
-* Place Letters on the Grid to spell out words 
+* Place Letters on the Grid to spell out words - you get one at a time 
 * Letters can be placed alone on an * or next to letterz where they could lead to a valid word
 * Complete words by placing an ! at the end - the longer the word the more points
 * Trash letters you can't use for a small time penalty
@@ -17,10 +17,11 @@
 
 * Automatically join the same game as others from across the world
 * The board resets every 15 minutes, so score as many points before then as you can
+* The bar at the bottom shows what letters other players currenlty have
 
 ### Build
 
-* The frontend is AngularJS 2 written in Typescript, hosted on (Surge)(https://spellsnap.2016.angularattack.io)
+* The frontend is AngularJS 2 written in Typescript, hosted on [Surge](https://spellsnap.2016.angularattack.io)
 * The backend is a simple NodeJS server, hosted on [Heroku](https://spellsnap.herokuapp.com)
 * The two communicate via Socket.io
 
